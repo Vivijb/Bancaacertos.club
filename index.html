@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Feiticeira com Menu Móvel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #F3F3F3;
+        }
+
+        .background-iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 0;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            cursor: move;
+        }
+
+        .menu-toggle {
+            background: #0078D4;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-toggle:hover {
+            background: #005EA2;
+            transform: scale(1.1) rotate(3deg);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        #menu-checkbox:checked + .menu-toggle {
+            background: rgba(0, 120, 212, 0.8); /* Azul semitransparente quando ativo */
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            background: rgba(255, 255, 255, 0.9); /* Fundo branco semitransparente */
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 300px;
+            max-height: 70vh;
+            overflow-y: auto;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #menu-checkbox:checked ~ .menu-content {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.7); /* Mais transparência quando aberto */
+        }
+
+        .menu-card {
+            background: rgba(243, 243, 243, 0.85); /* Cinza claro semitransparente */
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-card h3 {
+            margin: 0 0 10px;
+            color: #1F1F1F;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .menu-card select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #E1E1E1;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.95); /* Quase opaco para legibilidade */
+            color: #1F1F1F;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .menu-card select:focus {
+            outline: none;
+            background: #FFFFFF;
+            border-color: #0078D4;
+        }
+
+        .palpites-result {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(249, 249, 249, 0.9); /* Fundo claro semitransparente */
+            border-radius: 4px;
+            color: #1F1F1F;
+            font-size: 14px;
+            display: none;
+        }
+
+        .palpites-result ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .palpites-result li {
+            padding: 5px 0;
+        }
+
+        .menu-card a, .menu-card button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .menu-card a.fale-comigo {
+            background: rgba(0, 120, 212, 0.9); /* Azul semitransparente */
+        }
+
+        .menu-card a.fale-comigo:hover {
+            background: rgba(0, 94, 162, 0.9);
+        }
+
+        .menu-card button.banca-parceira {
+            background: rgba(88, 88, 88, 0.9); /* Cinza escuro semitransparente */
+        }
+
+        .menu-card button.banca-parceira:hover {
+            background: rgba(61, 61, 61, 0.9);
+        }
+
+        @media (max-width: 360px) {
+            .mobile-menu {
+                bottom: 10px;
+                left: 10px;
+            }
+            .menu-content {
+                width: 90vw;
+                max-height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <iframe src="https://app.acertos.club/pr/JcsF2PpU" class="background-iframe"></iframe>
+
+    <div class="mobile-menu" id="mobile-menu">
+        <input type="checkbox" id="menu-checkbox" style="display: none;">
+        <label for="menu-checkbox" class="menu-toggle">Menu</label>
+        <div class="menu-content">
+            <div class="menu-card">
+                <h3>Palpites do Dia</h3>
+                <select id="banca-select" onchange="showPalpites(this.value)">
+                    <option value="">Escolha uma banca</option>
+                    <option value="ptrio">PT Rio</option>
+                    <option value="look">Look</option>
+                    <option value="maluca">Maluca</option>
+                    <option value="lotep">Lotep</option>
+                    <option value="nacional">Nacional</option>
+                </select>
+                <div class="palpites-result" id="palpites-result">
+                    <ul id="palpites-list"></ul>
+                </div>
+            </div>
+            <div class="menu-card">
+                <a href="https://api.whatsapp.com/send?phone=5583994073892&text=Ol%C3%A1%2C%20suporte%2C%20preciso%20de%20sua%20ajuda!" target="_blank" class="fale-comigo">Fale Comigo</a>
+            </div>
+            <div class="menu-card">
+                <button class="banca-parceira" onclick="window.open('https://app.feiticeira.vip/pr/2iCVbLKr', '_blank')">Banca Parceira</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const palpitesData = {
+            "ptrio": [],
+            "look": [],
+            "maluca": [],
+            "lotep": [],
+            "nacional": []
+        };
+
+        function generateMilhar() {
+            return Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        }
+
+        function generatePalpites(banca) {
+            const palpites = new Set();
+            while (palpites.size < 10) {
+                palpites.add(generateMilhar());
+            }
+            palpitesData[banca] = Array.from(palpites);
+        }
+
+        Object.keys(palpitesData).forEach(banca => generatePalpites(banca));
+
+        function showPalpites(banca) {
+            const resultDiv = document.getElementById('palpites-result');
+            const ul = document.getElementById('palpites-list');
+            ul.innerHTML = '';
+
+            if (banca && palpitesData[banca]) {
+                resultDiv.style.display = 'block';
+                palpitesData[banca].forEach(palpite => {
+                    const li = document.createElement('li');
+                    li.textContent = palpite;
+                    ul.appendChild(li);
+                });
+            } else {
+                resultDiv.style.display = 'none';
+            }
+        }
+
+        // Tornar o menu arrastável
+        const mobileMenu = document.getElementById('mobile-menu');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+
+        mobileMenu.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDragging);
+
+        mobileMenu.addEventListener('touchstart', startDragging);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', stopDragging);
+
+        function startDragging(e) {
+            isDragging = true;
+            if (e.type === 'touchstart') {
+                initialX = e.touches[0].clientX - currentX;
+                initialY = e.touches[0].clientY - currentY;
+            } else {
+                initialX = e.clientX - currentX;
+                initialY = e.clientY - currentY;
+            }
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                let clientX, clientY;
+                if (e.type === 'touchmove') {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                currentX = clientX - initialX;
+                currentY = clientY - initialY;
+
+                currentX = Math.max(0, Math.min(currentX, window.innerWidth - mobileMenu.offsetWidth));
+                currentY = Math.max(0, Math.min(currentY, window.innerHeight - mobileMenu.offsetHeight));
+
+                mobileMenu.style.left = currentX + 'px';
+                mobileMenu.style.bottom = (window.innerHeight - currentY - mobileMenu.offsetHeight) + 'px';
+            }
+        }
+
+        function stopDragging() {
+            isDragging = false;
+        }
+
+        currentX = 20;
+        currentY = window.innerHeight - 20 - mobileMenu.offsetHeight;
+        mobileMenu.style.left = currentX + 'px';
+        mobileMenu.style.bottom = (window.innerHeight - currentY - mobileMenu.offsetHeight) + 'px';
+    </script>
+</body>
+</html> 
